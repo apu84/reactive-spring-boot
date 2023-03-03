@@ -29,7 +29,7 @@ public class EmployeeHandler {
     Mono<ServerResponse> get(final ServerRequest serverRequest) {
         final String id = serverRequest.pathVariable("id");
         return ServerResponse.ok().contentType(APPLICATION_JSON)
-                .body(employeeMongoDBRepository.findById(id), EmployeeImp.class);
+                .body(employeeMongoDBRepository.findById(id).flatMap(emp -> decorate(emp)), EmployeeView.class);
     }
 
     Mono<ServerResponse> create(final ServerRequest serverRequest) {
