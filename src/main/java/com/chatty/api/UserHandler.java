@@ -3,7 +3,6 @@ package com.chatty.api;
 import com.chatty.core.user.User;
 import com.chatty.core.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
