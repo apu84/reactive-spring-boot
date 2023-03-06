@@ -1,5 +1,6 @@
 package com.chatty.core;
 
+import com.chatty.core.user.User;
 import org.springframework.data.annotation.Id;
 
 import java.util.Date;

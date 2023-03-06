@@ -1,4 +1,4 @@
-package com.chatty.core;
+package com.chatty.core.user;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;

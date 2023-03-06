@@ -1,9 +1,11 @@
-package com.chatty.core;
+package com.chatty.core.user;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.util.Assert;
 
 import java.util.Date;
+
+import static org.springframework.util.Assert.notNull;
 
 public class User {
     @Id
@@ -25,8 +27,8 @@ public class User {
     private Date lastModified;
 
     public User(final String userName, final String name) {
-//        Assert.notNull(userName, "UserName is empty");
-//        Assert.notNull(name, "Name is empty");
+        notNull(userName, "UserName is empty");
+        notNull(name, "Name is empty");
         this.userName = userName;
         this.name = name;
         this.created = new Date();
@@ -76,18 +78,22 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+        notifyUpdate();
     }
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+        notifyUpdate();
     }
 
     public void setUserStatus(Status userStatus) {
         this.userStatus = userStatus;
+        notifyUpdate();
     }
 
     public void setAvailability(Availability availability) {
         this.availability = availability;
+        notifyUpdate();
     }
 
     public void setCreated(Date created) {
@@ -98,6 +104,9 @@ public class User {
         this.lastModified = lastModified;
     }
 
+    public void notifyUpdate() {
+        lastModified = new Date();
+    }
     @Override
     public String toString() {
         return String.format("User { id: %s, userName: %s, name: %s, created: %s, lastModified: %s }",

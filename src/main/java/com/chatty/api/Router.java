@@ -7,8 +7,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static com.chatty.api.ResponseUtils.get;
-import static com.chatty.api.ResponseUtils.post;
+import static com.chatty.api.ResponseUtils.*;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -20,6 +19,8 @@ public class Router {
                 .nest(path("/user"),
                         route(get("/{id}"), userHandler::get)
                                 .andRoute(post("/"), userHandler::create)
+                                .andRoute(put("/{id}"), userHandler::update)
+                                .andRoute(delete("/{id}"), userHandler::delete)
                 )
                 .andRoute(get("/users"), userHandler::getAll);
     }

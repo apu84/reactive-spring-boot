@@ -22,6 +22,14 @@ public class ResponseUtils {
         return POST(param).and(accept(APPLICATION_JSON));
     }
 
+    static RequestPredicate put(final String param) {
+        return PUT(param).and(accept(APPLICATION_JSON));
+    }
+
+    static RequestPredicate delete(final String param) {
+        return DELETE(param).and(accept(APPLICATION_JSON));
+    }
+
     static URI entityURI(final ServerRequest request, final String entityId) {
         return request.uri().resolve(entityId);
     }
