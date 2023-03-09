@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.util.Assert;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.springframework.util.Assert.notNull;
 
@@ -26,11 +27,23 @@ public class User {
     private Date created;
     private Date lastModified;
 
+    private List<String> roles;
+
+    public User() {}
+
     public User(final String userName, final String name) {
         notNull(userName, "UserName is empty");
-        notNull(name, "Name is empty");
         this.userName = userName;
         this.name = name;
+        this.created = new Date();
+        this.lastModified = new Date();
+        this.userStatus = Status.ACTIVE;
+    }
+
+    public User(final String userName, final List<String> roles) {
+        notNull(userName, "UserName is empty");
+        this.userName = userName;
+        this.roles = roles;
         this.created = new Date();
         this.lastModified = new Date();
         this.userStatus = Status.ACTIVE;
@@ -107,6 +120,11 @@ public class User {
     public void notifyUpdate() {
         lastModified = new Date();
     }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
     @Override
     public String toString() {
         return String.format("User { id: %s, userName: %s, name: %s, created: %s, lastModified: %s }",
