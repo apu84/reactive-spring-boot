@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static com.chatty.api.ResponseUtils.*;
+import static com.chatty.ResponseUtils.*;
 import static org.springframework.web.reactive.function.server.RequestPredicates.path;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -22,16 +22,5 @@ public class Router {
                                 .andRoute(delete("/{id}"), userHandler::delete)
                 )
                 .andRoute(get("/users"), userHandler::getAll);
-    }
-    @Bean
-    public RouterFunction<ServerResponse> commentRouters(final CommentHandler commentHandler) {
-        return RouterFunctions
-                .nest(path("/comment"),
-                        route(get("/{id}"), commentHandler::get)
-                                .andRoute(post("/"), commentHandler::create)
-                                .andRoute(put("/{id}"), commentHandler::update)
-                                .andRoute(delete("/{id}"), commentHandler::delete)
-                )
-                .andRoute(get("/comments"), commentHandler::getAll);
     }
 }

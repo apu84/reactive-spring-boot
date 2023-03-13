@@ -1,18 +1,19 @@
 package com.chatty.core.user;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.util.Assert;
 
+
+import javax.management.relation.Role;
 import java.util.Date;
 import java.util.List;
 
 import static org.springframework.util.Assert.notNull;
 
-public class User {
+public class ApplicationUser {
     @Id
     private String id;
-    private String userName;
-    private String name;
+    private String username;
+    private String email;
     private String avatar;
     private Status userStatus;
     enum Status {
@@ -26,39 +27,23 @@ public class User {
     }
     private Date created;
     private Date lastModified;
-
     private List<String> roles;
 
-    public User() {}
+    public ApplicationUser() {}
 
-    public User(final String userName, final String name) {
-        notNull(userName, "UserName is empty");
-        this.userName = userName;
-        this.name = name;
+    public ApplicationUser(final String username, final String email, final List<String> roles) {
+        notNull(email, "email is empty");
+        notNull(username, "UserName is empty");
+        this.username = username;
+        this.email = email;
         this.created = new Date();
         this.lastModified = new Date();
         this.userStatus = Status.ACTIVE;
-    }
-
-    public User(final String userName, final List<String> roles) {
-        notNull(userName, "UserName is empty");
-        this.userName = userName;
         this.roles = roles;
-        this.created = new Date();
-        this.lastModified = new Date();
-        this.userStatus = Status.ACTIVE;
     }
 
     public String getId() {
         return id;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getAvatar() {
@@ -81,17 +66,20 @@ public class User {
         return availability;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setName(String name) {
-        this.name = name;
-        notifyUpdate();
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setAvatar(String avatar) {
@@ -127,7 +115,7 @@ public class User {
 
     @Override
     public String toString() {
-        return String.format("User { id: %s, userName: %s, name: %s, created: %s, lastModified: %s }",
-                id, userName, name, created, lastModified);
+        return String.format("ApplicationUser { id: %s, userName: %s, name: %s, created: %s, lastModified: %s }",
+                id, email, username, created, lastModified);
     }
 }

@@ -1,43 +1,30 @@
 package com.chatty.core.comment;
 
-import com.chatty.core.user.User;
 import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Comment {
+public class Post {
     @Id
     private String id;
-    private User user;
-    private Comment parent;
+    private String userId;
+    private Post parent;
     private List<String> replyIds;
     private String content = "";
     Date created;
     Date lastModified;
 
-    public Comment(final User user, final String content) {
-        this(user, content, null);
-    }
-
-    public Comment(final User user, final String content, final Comment parent) {
-        this.user = user;
-        this.content = content;
-        this.parent = parent;
-        this.created = new Date();
-        this.lastModified = new Date();
-    }
-
     public String getId() {
         return id;
     }
 
-    public User getUser() {
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
-    public Comment getParent() {
+    public Post getParent() {
         return parent;
     }
 
@@ -59,6 +46,11 @@ public class Comment {
 
     public void setContent(String content) {
         this.content = content;
+        this.lastModified = new Date();
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public List<String> addReply(final String commentId) {
@@ -69,7 +61,11 @@ public class Comment {
         return replyIds;
     }
 
+    public Post() {
+        this.created = new Date();
+    }
+
     public String toString() {
-        return String.format("Comment { id: %s, user: %s, content: %s, created: %s, lastModified: %d }", id, user.getName(), content, created, lastModified);
+        return String.format("Post { id: %s, userId: %s, content: %s, created: %s, lastModified: %d }", id, userId, content, created, lastModified);
     }
 }

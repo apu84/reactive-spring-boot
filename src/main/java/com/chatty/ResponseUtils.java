@@ -1,4 +1,4 @@
-package com.chatty.api;
+package com.chatty;
 
 import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -10,27 +10,27 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 
 public class ResponseUtils {
-    static ServerResponse.BodyBuilder ok() {
+    public static ServerResponse.BodyBuilder ok() {
         return ServerResponse.ok().contentType(APPLICATION_JSON);
     }
 
-    static RequestPredicate get(final String param) {
+    public static RequestPredicate get(final String param) {
         return GET(param).and(accept(APPLICATION_JSON));
     }
 
-    static RequestPredicate post(final String param) {
+    public static RequestPredicate post(final String param) {
         return POST(param).and(accept(APPLICATION_JSON));
     }
 
-    static RequestPredicate put(final String param) {
+    public static RequestPredicate put(final String param) {
         return PUT(param).and(accept(APPLICATION_JSON));
     }
 
-    static RequestPredicate delete(final String param) {
+    public static RequestPredicate delete(final String param) {
         return DELETE(param).and(accept(APPLICATION_JSON));
     }
 
-    static URI entityURI(final ServerRequest request, final String entityId) {
+    public static URI entityURI(final ServerRequest request, final String entityId) {
         return request.uri().resolve(entityId);
     }
 }
