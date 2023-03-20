@@ -4,13 +4,10 @@ import com.chatty.ApplicationConfiguration;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserRepository;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,8 +40,7 @@ public class AuthFilter extends AuthenticationWebFilter {
         if (StringUtils.hasText(token)) {
             return validate(token)
                     .flatMap(user -> chain.filter(exchange)
-                                .contextWrite(withAuthentication(toAuthentication(user, token))))
-                    .onErrorResume((e) -> sendUnauthorized(exchange.getResponse()));
+                                .contextWrite(withAuthentication(toAuthentication(user, token))));
         }
         return chain.filter(exchange);
     }
@@ -60,10 +56,6 @@ public class AuthFilter extends AuthenticationWebFilter {
                 .build();
         return new UsernamePasswordAuthenticationToken(user, token, user.getAuthorities());
     }
-    private Mono<Void> sendUnauthorized(final ServerHttpResponse response) {
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        return response.setComplete();
-    }
 
     private Mono<ApplicationUser> validate(final String token) {
         return webClient.get()
@@ -71,12 +63,17 @@ public class AuthFilter extends AuthenticationWebFilter {
                 .accept(APPLICATION_JSON)
                 .header("Authorization", token)
                 .exchangeToMono(clientResponse -> {
+                    // TODO: Add Logging for the client response
                     if (clientResponse.statusCode().value() == 200) {
                         return clientResponse
                                 .bodyToMono(ApplicationUser.class)
                                 .flatMap(this::getUser);
+                    } else if (clientResponse.statusCode().value() == 401 ||
+                            clientResponse.statusCode().value() == 403) {
+                        throw new UnauthorizedException("Invalid user");
+                    } else {
+                        throw new IllegalArgumentException("Auth server returned: " + clientResponse.statusCode().value());
                     }
-                    return clientResponse.createError();
                 });
     }
 
