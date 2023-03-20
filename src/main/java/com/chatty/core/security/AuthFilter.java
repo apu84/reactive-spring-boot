@@ -1,6 +1,7 @@
 package com.chatty.core.security;
 
 import com.chatty.ApplicationConfiguration;
+import com.chatty.core.exception.UnauthorizedException;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserRepository;
 import org.springframework.http.HttpHeaders;

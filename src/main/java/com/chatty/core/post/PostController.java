@@ -1,6 +1,7 @@
 package com.chatty.core.post;
 
-import com.chatty.core.security.UnauthorizedException;
+import com.chatty.core.exception.BadRequestException;
+import com.chatty.core.exception.UnauthorizedException;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserRepository;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -79,10 +80,10 @@ public class PostController {
     @DeleteMapping("/{id}")
     public Mono<Void> delete(@AuthenticationPrincipal Mono<UserDetails> principal,
                              @PathVariable String id) {
-
-        return postRepository.findById(id)
-                .flatMap(savedPost -> deletePost(principal, savedPost))
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Post not found")));
+        return Mono.just(id)
+                .flatMap(postId -> postRepository.findById(postId))
+                .switchIfEmpty(Mono.error(new BadRequestException("Post not found")))
+                .flatMap(savedPost -> deletePost(principal, savedPost));
     }
 
     private Mono<Void> deletePost(Mono<UserDetails> principal, Post savedPost) {
