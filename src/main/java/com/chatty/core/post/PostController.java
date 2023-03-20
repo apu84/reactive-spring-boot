@@ -1,8 +1,9 @@
-package com.chatty.core.comment;
+package com.chatty.core.post;
 
 import com.chatty.core.security.UnauthorizedException;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserRepository;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,9 +27,9 @@ public class PostController {
     }
 
     @GetMapping("{id}")
+    @JsonView(PostViews.Public.class)
     public Mono<Post> get(@PathVariable final String id) {
-        notNull(id, "Post id is null");
-        return postRepository.findById(id);
+        return postRepository.findById(id).log();
     }
 
     private Mono<Post> savePost(final Post post) {
@@ -41,7 +42,7 @@ public class PostController {
         return requestPost
                 .flatMap(post -> currentUser(principal)
                         .map(appUser -> {
-                            post.setUserId(appUser.getId());
+                            post.setSenderId(appUser.getId());
                             return post;
                         })
                         .flatMap(this::savePost));
@@ -60,7 +61,7 @@ public class PostController {
     }
 
     private Mono<Post> updatePost(Mono<UserDetails> principal, Post savedPost, Post updatePost) {
-        String userId = savedPost.getUserId();
+        String userId = savedPost.getSenderId();
         return currentUser(principal)
                 .filter(authUser -> authUser.getId().equals(userId))
                 .switchIfEmpty(Mono.error(new UnauthorizedException("Unauthorized Modification")))
@@ -72,7 +73,7 @@ public class PostController {
     @GetMapping("/all")
     public Flux<Post> getAll(@AuthenticationPrincipal Mono<UserDetails> principal) {
         return currentUser(principal)
-                .flatMapMany(authUser -> postRepository.findAllByUserId(authUser.getId()));
+                .flatMapMany(authUser -> postRepository.findAllBySenderId(authUser.getId()));
     }
 
     @DeleteMapping("/{id}")
@@ -85,7 +86,7 @@ public class PostController {
     }
 
     private Mono<Void> deletePost(Mono<UserDetails> principal, Post savedPost) {
-        String userId = savedPost.getUserId();
+        String userId = savedPost.getSenderId();
         return currentUser(principal)
                 .filter(authUser -> authUser.getId().equals(userId))
                 .switchIfEmpty(Mono.error(new UnauthorizedException("Unauthorized Modification")))

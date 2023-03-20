@@ -1,5 +1,6 @@
-package com.chatty.core.comment;
+package com.chatty.core.post;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
@@ -9,19 +10,23 @@ import java.util.List;
 public class Post {
     @Id
     private String id;
-    private String userId;
+    @JsonView(PostViews.Internal.class)
+    private String senderId;
     private Post parent;
     private List<String> replyIds;
+    @JsonView(PostViews.Public.class)
     private String content = "";
+    @JsonView(PostViews.Public.class)
     Date created;
+    @JsonView(PostViews.Public.class)
     Date lastModified;
 
     public String getId() {
         return id;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getSenderId() {
+        return senderId;
     }
 
     public Post getParent() {
@@ -49,8 +54,8 @@ public class Post {
         this.lastModified = new Date();
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
     public List<String> addReply(final String commentId) {
@@ -66,6 +71,6 @@ public class Post {
     }
 
     public String toString() {
-        return String.format("Post { id: %s, userId: %s, content: %s, created: %s, lastModified: %d }", id, userId, content, created, lastModified);
+        return String.format("Post { id: %s, userId: %s, content: %s, created: %s, lastModified: %s }", id, senderId, content, created, lastModified);
     }
 }
