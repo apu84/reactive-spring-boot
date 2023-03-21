@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.util.Assert.notNull;
+import static com.chatty.core.post.Post.fromPost;
+import static reactor.core.publisher.Mono.zip;
 
 @RestController
 @RequestMapping("/post")
@@ -42,10 +43,7 @@ public class PostController {
                              @RequestBody Mono<Post> requestPost) {
         return requestPost
                 .flatMap(post -> currentUser(principal)
-                        .map(appUser -> {
-                            post.setSenderId(appUser.getId());
-                            return post;
-                        })
+                        .map(appUser -> fromPost(post).senderId(appUser.getId()).build())
                         .flatMap(this::savePost));
     }
 
@@ -57,8 +55,8 @@ public class PostController {
         return requestPost
                 .flatMap(updatedPost ->
                         postRepository.findById(id)
-                                      .flatMap(savedPost -> updatePost(principal, savedPost, updatedPost))
-                                      .switchIfEmpty(Mono.error(new IllegalArgumentException("Post not found"))));
+                                .flatMap(savedPost -> updatePost(principal, savedPost, updatedPost))
+                                .switchIfEmpty(Mono.error(new IllegalArgumentException("Post not found"))));
     }
 
     private Mono<Post> updatePost(Mono<UserDetails> principal, Post savedPost, Post updatePost) {
@@ -66,11 +64,9 @@ public class PostController {
         return currentUser(principal)
                 .filter(authUser -> authUser.getId().equals(userId))
                 .switchIfEmpty(Mono.error(new UnauthorizedException("Unauthorized Modification")))
-                .flatMap(authUser -> {
-                    savedPost.setContent(updatePost.getContent());
-                    return postRepository.save(savedPost);
-                });
+                .flatMap(authUser -> postRepository.save(fromPost(updatePost).build()));
     }
+
     @GetMapping("/all")
     public Flux<Post> getAll(@AuthenticationPrincipal Mono<UserDetails> principal) {
         return currentUser(principal)
@@ -97,6 +93,47 @@ public class PostController {
     private Mono<ApplicationUser> currentUser(Mono<UserDetails> principal) {
         return principal
                 .flatMap(authUser -> userRepository.findUserByEmail(authUser.getUsername()));
+    }
+
+    @PostMapping("/{id}")
+    public Mono<Post> postReply(@AuthenticationPrincipal Mono<UserDetails> principal,
+                                @RequestBody Mono<Post> requestPost,
+                                @PathVariable String id) {
+        Mono<String> parentPostId = Mono.just(id);
+
+        return zip(parentPostId, requestPost, principal).flatMap(tuple3 -> {
+            String parentId = tuple3.getT1();
+            Post reply = tuple3.getT2();
+            UserDetails userDetails = tuple3.getT3();
+            return userRepository
+                    .findUserByEmail(userDetails.getUsername())
+                    .flatMap(user -> saveReply(parentId, reply, user.getId()));
+        });
+    }
+
+    private Mono<Post> saveReply(String parentPostId,
+                                 Post replyPost,
+                                 String userId) {
+        return postRepository
+                .findById(parentPostId)
+                .flatMap(parentPost -> {
+                    Post reply = fromPost(replyPost).senderId(userId).parentId(parentPostId).build();
+                    return zip(Mono.just(parentPost), Mono.just(reply));
+                }).flatMap(tuple -> {
+                    if (!tuple.getT1().hasReplies()) {
+                        Post parent = fromPost(tuple.getT1())
+                                .hasReplies(true)
+                                .build();
+                        return savePost(tuple.getT2()).then(savePost(parent));
+                    } else {
+                        return savePost(tuple.getT2());
+                    }
+                });
+    }
+
+    @GetMapping("/{id}/replies")
+    public Flux<Post> getReplies(@PathVariable String id) {
+        return postRepository.findAllByParentId(id);
     }
 }
 
