@@ -39,7 +39,7 @@ public class Post {
         return parent;
     }
 
-    private void setReplyIds(List<String> replyIds) {
+    void setReplyIds(List<String> replyIds) {
         this.replyIds = replyIds;
     }
 
@@ -59,15 +59,15 @@ public class Post {
         return lastModified;
     }
 
-    private void setContent(String content) {
+    void setContent(String content) {
         this.content = content;
         this.lastModified = new Date();
     }
 
-    private void setSenderId(String senderId) {
+    void setSenderId(String senderId) {
         this.senderId = senderId;
     }
-    private void setParentId(String parentId) {
+    void setParentId(String parentId) {
         this.parentId = parentId;
     }
 
@@ -75,7 +75,7 @@ public class Post {
         this.created = created;
     }
 
-    private void setLastModified(Date lastModified) {
+    void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }
 
@@ -83,11 +83,11 @@ public class Post {
         return hasReplies;
     }
 
-    private void setHasReplies(boolean hasReplies) {
+    void setHasReplies(boolean hasReplies) {
         this.hasReplies = hasReplies;
     }
 
-    private void setId(String id) {
+    void setId(String id) {
         this.id = id;
     }
 
@@ -109,14 +109,14 @@ public class Post {
     }
 
     static class PostBuilder {
-        private String id;
-        private String senderId;
-        private String parentId;
-        private String content;
-        private List<String> replyIds;
-        private Date created;
-        private Date lastModified;
-        private boolean hasReplies;
+        String id;
+        String senderId;
+        String parentId;
+        String content;
+        List<String> replyIds;
+        Date created;
+        Date lastModified;
+        boolean hasReplies;
 
         public static PostBuilder builder() {
             return new PostBuilder();
