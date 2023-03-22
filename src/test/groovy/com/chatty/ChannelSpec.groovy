@@ -1,9 +1,11 @@
 package com.chatty
 
+import com.chatty.core.channel.Channel
 import com.chatty.core.channel.ChannelController
 import com.chatty.core.channel.ChannelRepository
 import com.chatty.core.security.AuthWebClient
 import com.chatty.core.user.ApplicationUser
+import com.chatty.core.user.UserRepository
 import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
@@ -18,6 +20,9 @@ class ChannelSpec extends BaseSpecification {
 
     @Autowired
     ChannelRepository  channelRepository
+
+    @Autowired
+    UserRepository userRepository
 
     String token = "Bearer token"
 
@@ -80,7 +85,46 @@ class ChannelSpec extends BaseSpecification {
             assert body.get("label") == 'API Gateway'
     }
 
+    def "Add user to channel"() {
+        given: "User Shaun exists"
+            var shaun = new ApplicationUser("shaun", "shaun@test.com", List.of( "USER"))
+            var user = userRepository.save(shaun).block()
+        and: "Channel exists"
+            var channel = Channel.ChannelBuilder.builder()
+                    .name("general")
+                    .label("General")
+                    .build()
+            var savedChannel = channelRepository.save(channel).block()
+        when: "User is added to channel"
+            var postResponse = webTestClient.post()
+                .uri('/channel/' + savedChannel.getId() + '/user')
+                .header("Content-Type", "application/json")
+                .header('Authorization', token)
+                .body(Mono.just(String.format("""{ "id": "%s"}""", user.getId())), String.class)
+                .exchange()
+        then: "Post response should return 200"
+            postResponse.expectStatus().isOk()
+    }
+
+    def "Subscribe loggedIn user to channel"() {
+        given: "Channel exists"
+        var channel = Channel.ChannelBuilder.builder()
+                .name("general")
+                .label("General")
+                .build()
+        var savedChannel = channelRepository.save(channel).block()
+        when: "User is added to channel"
+        var postResponse = webTestClient.post()
+                .uri('/channel/' + savedChannel.getId() + '/subscribe')
+                .header("Content-Type", "application/json")
+                .header('Authorization', token)
+                .exchange()
+        then: "Post response should return 200"
+        postResponse.expectStatus().isOk()
+    }
+
     def cleanup() {
+        userRepository.deleteAll().block()
         channelRepository.deleteAll().block()
     }
 }
