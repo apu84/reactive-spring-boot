@@ -1,7 +1,5 @@
 package com.chatty.core.security;
 
-import com.chatty.ApplicationConfiguration;
-import com.chatty.core.exception.UnauthorizedException;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserRepository;
 import org.springframework.http.HttpHeaders;
@@ -14,25 +12,23 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.core.context.ReactiveSecurityContextHolder.withAuthentication;
 
 public class AuthFilter extends AuthenticationWebFilter {
-    WebClient webClient;
+    AuthWebClient authWebClient;
 
     private UserRepository userRepository;
-    public AuthFilter(ApplicationConfiguration applicationConfiguration,
-                      UserRepository userRepository) {
+    public AuthFilter(UserRepository userRepository,
+                      AuthWebClient webClient) {
         super((ReactiveAuthenticationManager) Mono::just);
-        webClient = WebClient.create(applicationConfiguration.getAuthServer());
         this.userRepository = userRepository;
+        this.authWebClient = webClient;
     }
 
     @Override
@@ -59,23 +55,7 @@ public class AuthFilter extends AuthenticationWebFilter {
     }
 
     private Mono<ApplicationUser> validate(final String token) {
-        return webClient.get()
-                .uri("/auth/me")
-                .accept(APPLICATION_JSON)
-                .header("Authorization", token)
-                .exchangeToMono(clientResponse -> {
-                    // TODO: Add Logging for the client response
-                    if (clientResponse.statusCode().value() == 200) {
-                        return clientResponse
-                                .bodyToMono(ApplicationUser.class)
-                                .flatMap(this::getUser);
-                    } else if (clientResponse.statusCode().value() == 401 ||
-                            clientResponse.statusCode().value() == 403) {
-                        throw new UnauthorizedException("Invalid user");
-                    } else {
-                        throw new IllegalArgumentException("Auth server returned: " + clientResponse.statusCode().value());
-                    }
-                });
+        return authWebClient.validate(token).flatMap(this::getUser);
     }
 
     Mono<ApplicationUser> getUser(ApplicationUser authUser) {

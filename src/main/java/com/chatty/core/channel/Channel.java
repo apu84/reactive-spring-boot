@@ -63,7 +63,7 @@ public class Channel {
                 .postIds(channel.getPostIds());
     }
 
-    static class ChannelBuilder {
+    public static class ChannelBuilder {
         String id;
         String name;
         String label;

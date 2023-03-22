@@ -11,13 +11,14 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
 public class SecurityConfig {
-    private ApplicationConfiguration applicationConfiguration;
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final AuthWebClient authWebClient;
     @Autowired
     public SecurityConfig(ApplicationConfiguration applicationConfiguration,
-                          UserRepository userRepository) {
-        this.applicationConfiguration = applicationConfiguration;
+                          UserRepository userRepository,
+                          AuthWebClient authWebClient) {
         this.userRepository = userRepository;
+        this.authWebClient = authWebClient;
     }
     @Bean
     SecurityWebFilterChain springWebFilterChain(final ServerHttpSecurity http) {
@@ -33,7 +34,7 @@ public class SecurityConfig {
         http.authorizeExchange()
                 .pathMatchers("/**").authenticated()
                 .and()
-                .addFilterAt(new AuthFilter(applicationConfiguration, userRepository), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(new AuthFilter(userRepository, authWebClient), SecurityWebFiltersOrder.AUTHENTICATION)
                 .httpBasic().disable()
                 .formLogin().disable()
                 .csrf().disable()

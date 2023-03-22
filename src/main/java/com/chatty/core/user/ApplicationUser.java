@@ -28,6 +28,7 @@ public class ApplicationUser {
     private Date created;
     private Date lastModified;
     private List<String> roles;
+    private List<String> channelIds;
 
     public ApplicationUser() {}
 
@@ -111,6 +112,14 @@ public class ApplicationUser {
 
     public List<String> getRoles() {
         return roles;
+    }
+
+    public List<String> getChannelIds() {
+        return channelIds;
+    }
+
+    public void setChannelIds(List<String> channelIds) {
+        this.channelIds = channelIds;
     }
 
     @Override
