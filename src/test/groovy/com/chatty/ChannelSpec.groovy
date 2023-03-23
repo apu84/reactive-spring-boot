@@ -30,17 +30,30 @@ class ChannelSpec extends BaseSpecification {
     String token = "Bearer token"
 
     def setup() {
-        var loggedInUser = new ApplicationUser("test", "test@test.com", List.of("ADMIN", "USER"))
+    }
+
+    def setupLoggedInUser(String name, String email, String role) {
+        var loggedInUser = new ApplicationUser(name, email, List.of("ROLE_" + role))
         authWebClient.validate(token) >> Mono.just(loggedInUser)
+    }
+
+    def setupLoggedInUser(String role) {
+        setupLoggedInUser("test", "test@test.com", role)
+    }
+
+    def setupLoggedInUserAsAdmin() {
+        setupLoggedInUser("ADMIN")
     }
 
     def "Posting Channel object persists channel"() {
         given: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway"
+            setupLoggedInUserAsAdmin()
             var channel = """{
                         "name": "gateway",
                         "label": "API Gateway",
                         "topics": "api,gateway"
                     }"""
+
         when: "Channel is posted to /channel endpoint"
             var response = webTestClient.post()
             .uri('/channel')
@@ -49,47 +62,61 @@ class ChannelSpec extends BaseSpecification {
             .body(Mono.just(channel), String.class)
             .exchange()
             .returnResult(Map.class)
+
         then: "Returned Object will contained Channel with unique id, name=gateway"
-        Map<String, String> body = response.responseBody.blockFirst()
-        assert body.get("name") == 'gateway'
-        assert body.get("id") != null
-        assert body.get("label") == 'API Gateway'
+            Map<String, String> body = response.responseBody.blockFirst()
+            assert body.get("name") == 'gateway'
+            assert body.get("id") != null
+            assert body.get("label") == 'API Gateway'
+    }
+
+    def "Posting Channel object as non ADMIN user"() {
+        given: "Logged user doesn't have ADMIN role"
+            setupLoggedInUser('USER')
+        and: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway"
+            var channel = """{
+                            "name": "gateway",
+                            "label": "API Gateway",
+                            "topics": "api,gateway"
+                        }"""
+        when: "Channel is posted to /channel endpoint"
+            var response = webTestClient.post()
+                    .uri('/channel')
+                    .header("Content-Type", "application/json")
+                    .header('Authorization', token)
+                    .body(Mono.just(channel), String.class)
+                    .exchange()
+        then: "Response will return Forbidden"
+            response.expectStatus().isForbidden()
+
     }
 
     def "Get Channel after creating channel"() {
         given: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway is created"
-        var channel = """{
-                        "name": "gateway",
-                        "label": "API Gateway",
-                        "topics": "api,gateway"
-                    }"""
-        var postResponse = webTestClient.post()
-                .uri('/channel')
-                .header("Content-Type", "application/json")
-                .header('Authorization', token)
-                .body(Mono.just(channel), String.class)
-                .exchange()
-                .returnResult(Map.class)
-        Map<String, String> responseBody = postResponse.responseBody.blockFirst()
-        var channelId = responseBody.get("id")
-        assert channelId != null
+            setupLoggedInUser('USER')
+            var channel = Channel.ChannelBuilder.builder()
+                    .name("general")
+                    .label("General")
+                    .build()
+            var savedChannel = channelRepository.save(channel).block()
 
         when: "GET /channel/id will return the created channel"
-        var response = webTestClient.get()
-                .uri('/channel/' + channelId)
-                .header("Content-Type", "application/json")
-                .header('Authorization', token)
-                .exchange()
-                .returnResult(Map.class)
-        then: "Returned Object will contained Channel name=gateway"
+            var response = webTestClient.get()
+                    .uri('/channel/' + savedChannel.getId())
+                    .header("Content-Type", "application/json")
+                    .header('Authorization', token)
+                    .exchange()
+                    .returnResult(Map.class)
+        then: "Returned Object will contained Channel name=general"
             Map<String, String> body = response.responseBody.blockFirst()
-            assert body.get("name") == 'gateway'
-            assert body.get("id") == channelId
-            assert body.get("label") == 'API Gateway'
+            assert body.get("name") == 'general'
+            assert body.get("id") == savedChannel.getId()
+            assert body.get("label") == 'General'
     }
 
     def "Add user to channel"() {
         given: "User Shaun exists"
+            setupLoggedInUser('USER')
             var shaun = new ApplicationUser("shaun", "shaun@test.com", List.of( "USER"))
             var user = userRepository.save(shaun).block()
         and: "Channel exists"
@@ -111,6 +138,7 @@ class ChannelSpec extends BaseSpecification {
 
     def "Subscribe loggedIn user to channel"() {
         given: "Channel exists"
+            setupLoggedInUser('USER')
             var channel = Channel.ChannelBuilder.builder()
                     .name("general")
                     .label("General")
@@ -128,6 +156,7 @@ class ChannelSpec extends BaseSpecification {
 
     def "Add post to channel"() {
         given: "User is subscribed to channel"
+            setupLoggedInUser('USER')
             var user = new ApplicationUser("test", "test@test.com", List.of("USER"))
             var savedUser = userRepository.save(user).block()
         and: "Channel exists"
@@ -154,6 +183,7 @@ class ChannelSpec extends BaseSpecification {
     }
 
     def "Add post to channel for user not subscribed to channel"() {
+        setupLoggedInUser('USER')
         given: "User is present "
             var user = new ApplicationUser("test", "test@test.com", List.of("USER"))
             userRepository.save(user).block()
@@ -177,6 +207,7 @@ class ChannelSpec extends BaseSpecification {
     }
 
     def "Add reply to post on a channel"() {
+        setupLoggedInUser('USER')
         given: "User is subscribed to channel"
             var user = new ApplicationUser("test", "test@test.com", List.of("USER"))
             var savedUser = userRepository.save(user).block()

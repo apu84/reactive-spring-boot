@@ -5,6 +5,8 @@ import com.chatty.core.post.Post;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,8 @@ public class ChannelController {
         this.userService = userService;
     }
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Channel> createChannel(@RequestBody Mono<Channel> channelMono) {
         return channelMono.flatMap(channelService::saveChannel);
     }
