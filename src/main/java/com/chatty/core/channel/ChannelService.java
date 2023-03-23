@@ -51,10 +51,10 @@ public class ChannelService {
                 .switchIfEmpty(Mono.error(new BadRequestException("Invalid channelId")))
                 .flatMap(channelRepository::delete);
     }
-    Mono<Void> addUserToChannel(String userId, String channelId) {
+    Mono<ApplicationUser> addUserToChannel(String userId, String channelId) {
         return Mono.empty();
     }
-    Mono<Void> removeUserFromChannel(String userId, String channelId) {
+    Mono<ApplicationUser> removeUserFromChannel(String userId, String channelId) {
         return Mono.empty();
     }
     Mono<ChannelPost> addUserPost(ApplicationUser user, Post post, String channelId) {

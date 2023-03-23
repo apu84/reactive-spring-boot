@@ -6,10 +6,11 @@ public class ChannelPost extends Post {
     public void setChannelId(String channelId) {
         this.channelId = channelId;
     }
-
-    static class ChannelPostBuilder extends PostBuilder {
+    public static ChannelPostBuilder builder() {
+        return new ChannelPostBuilder();
+    }
+    public static class ChannelPostBuilder extends PostBuilder {
         private String channelId;
-
         public ChannelPostBuilder channelId(String channelId) {
             this.channelId = channelId;
             return this;

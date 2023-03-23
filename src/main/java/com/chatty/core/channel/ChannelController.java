@@ -52,24 +52,24 @@ public class ChannelController {
         return channelService.deleteChannel(id);
     }
     @PostMapping("/{channelId}/user")
-    public Mono<Void> addUserToChannel(@RequestBody Mono<ApplicationUser> applicationUserMono,
+    public Mono<ApplicationUser> addUserToChannel(@RequestBody Mono<ApplicationUser> applicationUserMono,
                                        @PathVariable String channelId) {
         return applicationUserMono.flatMap(user -> channelService.addUserToChannel(user.getId(), channelId));
     }
     @PostMapping("/{channelId}/subscribe")
-    public Mono<Void> addCurrentUserToChannel(@AuthenticationPrincipal Mono<UserDetails> principal,
+    public Mono<ApplicationUser> addCurrentUserToChannel(@AuthenticationPrincipal Mono<UserDetails> principal,
                                        @PathVariable String channelId) {
         return userService.toApplicationUser(principal)
                 .flatMap(user -> channelService.addUserToChannel(user.getId(), channelId));
     }
     @PostMapping("/{channelId}/unsubscribe")
-    public Mono<Void> removeCurrentUserFromChannel(@AuthenticationPrincipal Mono<UserDetails> principal,
+    public Mono<ApplicationUser> removeCurrentUserFromChannel(@AuthenticationPrincipal Mono<UserDetails> principal,
                                               @PathVariable String channelId) {
         return userService.toApplicationUser(principal)
                 .flatMap(user -> channelService.removeUserFromChannel(user.getId(), channelId));
     }
     @PostMapping("/{channelId}/remove-user")
-    public Mono<Void> removeUserFromChannel(@RequestBody Mono<ApplicationUser> applicationUserMono,
+    public Mono<ApplicationUser> removeUserFromChannel(@RequestBody Mono<ApplicationUser> applicationUserMono,
                                             @PathVariable String channelId) {
         return applicationUserMono.flatMap(user -> channelService.removeUserFromChannel(user.getId(), channelId));
     }

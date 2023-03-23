@@ -108,7 +108,7 @@ public class Post {
                 .replyIds(post.replyIds);
     }
 
-    static class PostBuilder {
+    public static class PostBuilder {
         String id;
         String senderId;
         String parentId;
