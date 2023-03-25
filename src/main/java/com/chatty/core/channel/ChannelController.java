@@ -47,6 +47,7 @@ public class ChannelController {
                 .flatMapMany(channelService::getChannelsSubscribedByUser);
     }
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Channel> updateChannel(@PathVariable String id,
                                        @RequestBody Mono<Channel> updateChannel) {
         return updateChannel.flatMap(ch -> channelService.updateChannel(id, ch));

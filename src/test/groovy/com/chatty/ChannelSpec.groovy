@@ -114,6 +114,64 @@ class ChannelSpec extends BaseSpecification {
             assert body.get("label") == 'General'
     }
 
+    def "PUT Channel object updates channel"() {
+        given: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway exists"
+            setupLoggedInUserAsAdmin()
+            var channel = Channel.ChannelBuilder.builder()
+                    .name("general")
+                    .label("General")
+                    .build()
+            var savedChannel = channelRepository.save(channel).block()
+
+        when: "Channel label is changed to FooBar"
+            var updateChannel = """{
+                            "name": "gateway",
+                            "label": "FooBar",
+                            "topics": "api,gateway"
+                        }"""
+
+            var response = webTestClient.put()
+                    .uri('/channel/' + savedChannel.getId())
+                    .header("Content-Type", "application/json")
+                    .header('Authorization', token)
+                    .body(Mono.just(updateChannel), String.class)
+                    .exchange()
+                    .returnResult(Map.class)
+
+        then: "Returned Object will contained Channel with label=FooBar"
+            Map<String, String> body = response.responseBody.blockFirst()
+            assert body.get("name") == 'gateway'
+            assert body.get("id") == savedChannel.getId()
+            assert body.get("label") == 'FooBar'
+    }
+
+    def "PUT Channel object to updates channel as non admin user"() {
+        given: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway exists"
+            setupLoggedInUser('USER')
+            var channel = Channel.ChannelBuilder.builder()
+                    .name("general")
+                    .label("General")
+                    .build()
+            var savedChannel = channelRepository.save(channel).block()
+
+        when: "Channel label is changed to FooBar"
+            var updateChannel = """{
+                                "name": "gateway",
+                                "label": "FooBar",
+                                "topics": "api,gateway"
+                            }"""
+
+            var response = webTestClient.put()
+                    .uri('/channel/' + savedChannel.getId())
+                    .header("Content-Type", "application/json")
+                    .header('Authorization', token)
+                    .body(Mono.just(updateChannel), String.class)
+                    .exchange()
+
+        then: "Returned response will be 403"
+            response.expectStatus().isForbidden()
+    }
+
     def "Add user to channel"() {
         given: "User Shaun exists"
             setupLoggedInUser('USER')

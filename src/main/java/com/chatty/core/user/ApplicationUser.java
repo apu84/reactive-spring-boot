@@ -1,21 +1,28 @@
 package com.chatty.core.user;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 
-
-import javax.management.relation.Role;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.springframework.util.Assert.notNull;
-
+@Builder(toBuilder = true)
+@ToString
+@Getter
 public class ApplicationUser {
     @Id
     private String id;
+    @NonNull
     private String username;
+    @NonNull
     private String email;
     private String avatar;
-    private Status userStatus;
+    @Builder.Default
+    private Status userStatus = Status.ACTIVE;
     enum Status {
         ACTIVE,
         INACTIVE,
@@ -25,106 +32,14 @@ public class ApplicationUser {
         ONLINE,
         OFFLINE
     }
-    private Date created;
-    private Date lastModified;
-    private List<String> roles;
-    private List<String> channelIds;
-
-    public ApplicationUser() {}
-
-    public ApplicationUser(final String username, final String email, final List<String> roles) {
-        notNull(email, "email is empty");
-        notNull(username, "UserName is empty");
-        this.username = username;
-        this.email = email;
-        this.created = new Date();
-        this.lastModified = new Date();
-        this.userStatus = Status.ACTIVE;
-        this.roles = roles;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public Status getUserStatus() {
-        return userStatus;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    public Availability getAvailability() {
-        return availability;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-        notifyUpdate();
-    }
-
-    public void setUserStatus(Status userStatus) {
-        this.userStatus = userStatus;
-        notifyUpdate();
-    }
-
-    public void setAvailability(Availability availability) {
-        this.availability = availability;
-        notifyUpdate();
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    public void notifyUpdate() {
-        lastModified = new Date();
-    }
-
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    public List<String> getChannelIds() {
-        return channelIds;
-    }
-
-    public void setChannelIds(List<String> channelIds) {
-        this.channelIds = channelIds;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("ApplicationUser { id: %s, userName: %s, name: %s, created: %s, lastModified: %s }",
-                id, email, username, created, lastModified);
-    }
+    @Builder.Default
+    private Date created = new Date();
+    @Builder.Default
+    private Date lastModified = new Date();
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();
+    @Builder.Default
+    private List<String> channelIds = new ArrayList<>();
+    @Builder.Default
+    private List<String> spaceIds = new ArrayList<>();
 }
