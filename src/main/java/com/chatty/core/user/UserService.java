@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -24,7 +25,7 @@ public class UserService {
     public Mono<ApplicationUser> addSpaceToUser(ApplicationUser user, Space space) {
         List<String> spaces = user.getSpaceIds();
         spaces.add(space.getId());
-        user.toBuilder().spaceIds(spaces);
-        return userRepository.save(user);
+        ApplicationUser updateUser = user.toBuilder().spaceIds(spaces).lastModified(new Date()).build();
+        return userRepository.save(updateUser);
     }
 }

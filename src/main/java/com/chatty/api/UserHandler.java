@@ -70,16 +70,15 @@ public class UserHandler {
         return userRepository
                 .findById(id)
                 .flatMap(user -> {
-                    if(inputUser.getUsername() != null) {
-                        user.setUsername(inputUser.getUsername());
-                    }
+                    ApplicationUser.ApplicationUserBuilder applicationUserBuilder = user.toBuilder();
+                    applicationUserBuilder.username(inputUser.getUsername());
                     if(inputUser.getAvailability() != null) {
-                        user.setAvailability(inputUser.getAvailability());
+                        applicationUserBuilder.availability(inputUser.getAvailability());
                     }
                     if(inputUser.getUserStatus() != null) {
-                        user.setUserStatus(inputUser.getUserStatus());
+                        applicationUserBuilder.userStatus(inputUser.getUserStatus());
                     }
-                    return userRepository.save(user);
+                    return userRepository.save(applicationUserBuilder.build());
                 })
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("ApplicationUser not found")));
     }

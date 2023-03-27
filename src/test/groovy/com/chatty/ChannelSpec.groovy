@@ -5,18 +5,14 @@ import com.chatty.core.channel.ChannelController
 import com.chatty.core.channel.ChannelRepository
 import com.chatty.core.post.ChannelPost
 import com.chatty.core.post.PostRepository
-import com.chatty.core.security.AuthWebClient
 import com.chatty.core.user.ApplicationUser
 import com.chatty.core.user.UserRepository
-import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import reactor.core.publisher.Mono
 
 @WebFluxTest(controllers= ChannelController.class)
 class ChannelSpec extends BaseSpecification {
-    @SpringBean
-    AuthWebClient authWebClient = Stub()
 
     @Autowired
     ChannelRepository  channelRepository
@@ -27,22 +23,7 @@ class ChannelSpec extends BaseSpecification {
     @Autowired
     PostRepository postRepository
 
-    String token = "Bearer token"
-
     def setup() {
-    }
-
-    def setupLoggedInUser(String name, String email, String role) {
-        var loggedInUser = new ApplicationUser(name, email, List.of("ROLE_" + role))
-        authWebClient.validate(token) >> Mono.just(loggedInUser)
-    }
-
-    def setupLoggedInUser(String role) {
-        setupLoggedInUser("test", "test@test.com", role)
-    }
-
-    def setupLoggedInUserAsAdmin() {
-        setupLoggedInUser("ADMIN")
     }
 
     def "Posting Channel object persists channel"() {
@@ -94,7 +75,7 @@ class ChannelSpec extends BaseSpecification {
     def "Get Channel after creating channel"() {
         given: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway is created"
             setupLoggedInUser('USER')
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                     .name("general")
                     .label("General")
                     .build()
@@ -117,7 +98,7 @@ class ChannelSpec extends BaseSpecification {
     def "PUT Channel object updates channel"() {
         given: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway exists"
             setupLoggedInUserAsAdmin()
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                     .name("general")
                     .label("General")
                     .build()
@@ -148,7 +129,7 @@ class ChannelSpec extends BaseSpecification {
     def "PUT Channel object to updates channel as non admin user"() {
         given: "A Channel object with name=gateway, label=API Gateway and topic=api,gateway exists"
             setupLoggedInUser('USER')
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                     .name("general")
                     .label("General")
                     .build()
@@ -175,10 +156,14 @@ class ChannelSpec extends BaseSpecification {
     def "Add user to channel"() {
         given: "User Shaun exists"
             setupLoggedInUser('USER')
-            var shaun = new ApplicationUser("shaun", "shaun@test.com", List.of( "USER"))
+            var shaun = ApplicationUser.builder()
+                    .username("shaun")
+                    .email("shaun@test.com")
+                    .roles(List.of("USER"))
+                    .build()
             var user = userRepository.save(shaun).block()
         and: "Channel exists"
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                     .name("general")
                     .label("General")
                     .build()
@@ -197,7 +182,7 @@ class ChannelSpec extends BaseSpecification {
     def "Subscribe loggedIn user to channel"() {
         given: "Channel exists"
             setupLoggedInUser('USER')
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                     .name("general")
                     .label("General")
                     .build()
@@ -215,10 +200,14 @@ class ChannelSpec extends BaseSpecification {
     def "Add post to channel"() {
         given: "User is subscribed to channel"
             setupLoggedInUser('USER')
-            var user = new ApplicationUser("test", "test@test.com", List.of("USER"))
+            var user = ApplicationUser.builder()
+                    .username("test")
+                    .email("test@test.com")
+                    .roles(List.of("USER"))
+                    .build()
             var savedUser = userRepository.save(user).block()
         and: "Channel exists"
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                 .name("general")
                 .label("General")
                 .userIds(List.of(savedUser.getId()))
@@ -243,10 +232,14 @@ class ChannelSpec extends BaseSpecification {
     def "Add post to channel for user not subscribed to channel"() {
         setupLoggedInUser('USER')
         given: "User is present "
-            var user = new ApplicationUser("test", "test@test.com", List.of("USER"))
+            var user = ApplicationUser.builder()
+                    .username("test")
+                    .email("test@test.com")
+                    .roles(List.of("USER"))
+                    .build()
             userRepository.save(user).block()
         and: "Channel exists, but user not subscribed"
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                     .name("general")
                     .label("General")
                     .build()
@@ -267,11 +260,15 @@ class ChannelSpec extends BaseSpecification {
     def "Add reply to post on a channel"() {
         setupLoggedInUser('USER')
         given: "User is subscribed to channel"
-            var user = new ApplicationUser("test", "test@test.com", List.of("USER"))
+            var user = ApplicationUser.builder()
+                    .username("test")
+                    .email("test@test.com")
+                    .roles(List.of("USER"))
+                    .build()
             var savedUser = userRepository.save(user).block()
 
         and: "Channel exists"
-            var channel = Channel.ChannelBuilder.builder()
+            var channel = Channel.builder()
                     .name("general")
                     .label("General")
                     .userIds(List.of(savedUser.getId()))

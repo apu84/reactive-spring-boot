@@ -26,19 +26,13 @@ public class ChannelController {
         this.channelService = channelService;
         this.userService = userService;
     }
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
-    public Mono<Channel> createChannel(@RequestBody Mono<Channel> channelMono) {
-        return channelMono.flatMap(channelService::saveChannel);
-    }
     @GetMapping("/{id}")
     public Mono<Channel> getChannel(@PathVariable String id) {
-        return channelService.getChannel(id);
+        return channelService.get(id);
     }
     @GetMapping
     public Flux<Channel> getAllChannels() {
-        return channelService.getAllChannels();
+        return channelService.getAll();
     }
 
     @GetMapping("/subscribed")
@@ -54,7 +48,7 @@ public class ChannelController {
     }
     @DeleteMapping("/{id}")
     public Mono<Void> deleteChannel(@PathVariable String id) {
-        return channelService.deleteChannel(id);
+        return channelService.delete(id);
     }
     @PostMapping("/{channelId}/user")
     public Mono<ApplicationUser> addUserToChannel(@RequestBody Mono<ApplicationUser> applicationUserMono,

@@ -65,8 +65,11 @@ public class AuthFilter extends AuthenticationWebFilter {
     }
 
     Mono<ApplicationUser> saveUser(ApplicationUser authUser) {
-        ApplicationUser applicationUser
-                = new ApplicationUser(authUser.getUsername(), authUser.getEmail(), authUser.getRoles());
+        ApplicationUser applicationUser = ApplicationUser.builder()
+                .username(authUser.getUsername())
+                .email(authUser.getEmail())
+                .roles(authUser.getRoles())
+                .build();
         return userRepository.save(applicationUser);
     }
     private String resolveToken(ServerHttpRequest request) {

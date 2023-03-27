@@ -1,5 +1,6 @@
 package com.chatty.core.space;
 
+import com.chatty.core.CrudService;
 import com.chatty.core.exception.BadRequestException;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserService;
@@ -12,23 +13,24 @@ import java.util.Date;
 import static reactor.core.publisher.Mono.zip;
 
 @Component
-public class SpaceService {
+public class SpaceService extends CrudService<Space, SpaceRepository, String> {
     private final SpaceRepository spaceRepository;
     private final UserService userService;
 
     @Autowired
     SpaceService(SpaceRepository spaceRepository,
                  UserService userService) {
+        super(spaceRepository);
         this.spaceRepository = spaceRepository;
         this.userService = userService;
     }
-    Mono<Space> saveSpace(Space space) {
-        return spaceRepository.save(space);
-    }
 
     Mono<Space> updateSpace(String spaceId, Space updateSpace) {
-        return getSpaceElseThrow(spaceId)
-                .flatMap(space -> spaceRepository.save(updateSpace(space, updateSpace)));
+        return update(spaceId, savedSpace -> savedSpace.toBuilder()
+                .name(updateSpace.getName())
+                .label(updateSpace.getLabel())
+                .lastModified(new Date())
+                .build());
     }
 
     Mono<ApplicationUser> addUserToSpace(String userId, String spaceId) {
@@ -39,13 +41,5 @@ public class SpaceService {
     public Mono<Space> getSpaceElseThrow(String spaceId) {
         return spaceRepository.findById(spaceId)
                 .switchIfEmpty(Mono.error(new BadRequestException("Invalid space")));
-    }
-
-    static Space updateSpace(Space oldSpace, Space newSpace) {
-        return oldSpace.toBuilder()
-                .name(newSpace.getName())
-                .label(newSpace.getLabel())
-                .lastModified(new Date())
-                .build();
     }
 }
