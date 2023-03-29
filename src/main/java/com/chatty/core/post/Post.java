@@ -1,18 +1,19 @@
 package com.chatty.core.post;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
 import java.util.Date;
 import java.util.List;
 
-@Builder(toBuilder = true)
 @Getter
 @ToString
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Post {
     @Id
     private String id;

@@ -1,28 +1,33 @@
 package com.chatty.core.channel;
 
 import com.chatty.core.CrudService;
+import com.chatty.core.messaging.ChannelPostMessageService;
 import com.chatty.core.post.ChannelPost;
 import com.chatty.core.post.Post;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserService;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Component
 public class ChannelService extends CrudService<Channel, ChannelRepository, String> {
     private final ChannelRepository channelRepository;
     private final UserService userService;
+    private final ChannelPostService channelPostService;
+
+    @Autowired
     public ChannelService(ChannelRepository channelRepository,
-                          UserService userService) {
+                          UserService userService,
+                          ChannelPostService channelPostService) {
         super(channelRepository);
         this.channelRepository = channelRepository;
         this.userService = userService;
+        this.channelPostService = channelPostService;
     }
     Flux<Channel> getChannelsSubscribedByUser(ApplicationUser user) {
         return Flux.fromIterable(user.getChannelIds())
@@ -84,7 +89,13 @@ public class ChannelService extends CrudService<Channel, ChannelRepository, Stri
                 });
     }
     Mono<ChannelPost> addUserPost(ApplicationUser user, Post post, String channelId) {
-        return Mono.empty();
+        ChannelPost channelPost = ChannelPost.builder()
+                .parentId(user.getId())
+                .channelId(channelId)
+                .content(post.getContent())
+                .senderId(user.getId())
+                .build();
+        return channelPostService.save(channelPost);
     }
 
     Mono<ChannelPost> addUserPostReply(ApplicationUser user,

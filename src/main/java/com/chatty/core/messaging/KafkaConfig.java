@@ -1,7 +1,6 @@
 package com.chatty.core.messaging;
 
 import com.chatty.core.post.ChannelPost;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -12,14 +11,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
 public class KafkaConfig {
-    @Value("${spring.kafka.bootstrap-servers")
+    @Value("${spring.kafka.bootstrap.servers}")
     private String bootStrapServers;
+    @Value("${messaging.topic}")
+    private String topic;
 
     @Bean
     public Map<String, Object> producerConfig() {
@@ -31,7 +33,7 @@ public class KafkaConfig {
     }
     @Bean
     public ProducerFactory<String, ChannelPost> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfig());
+        return new DefaultKafkaProducerFactory<>(producerConfig(), new StringSerializer(), new JsonSerializer<>());
     }
     @Bean
     public KafkaTemplate<String, ChannelPost> kafkaTemplate() {
@@ -56,5 +58,9 @@ public class KafkaConfig {
         var factory = new ConcurrentKafkaListenerContainerFactory<String, ChannelPost>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
+    }
+
+    public String getTopic() {
+        return topic;
     }
 }

@@ -210,7 +210,8 @@ class ChannelSpec extends BaseSpecification {
             var channel = Channel.builder()
                 .name("general")
                 .label("General")
-                .userIds(List.of(savedUser.getId()))
+                .userIds(Set.of(savedUser.getId()))
+                .spaceId("some_dummy_space")
                 .build()
             var savedChannel = channelRepository.save(channel).block()
 
