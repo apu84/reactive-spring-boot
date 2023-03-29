@@ -5,6 +5,7 @@ import com.chatty.core.exception.UnauthorizedException;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserRepository;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,30 +13,33 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.chatty.core.post.Post.fromPost;
 import static reactor.core.publisher.Mono.zip;
 
 @RestController
 @RequestMapping("/post")
+@Slf4j
 public class PostController {
     private PostRepository postRepository;
     private UserRepository userRepository;
+    private PostService postService;
 
     @Autowired
     PostController(final PostRepository postRepository,
-                   final UserRepository userRepository) {
+                   final UserRepository userRepository,
+                   final PostService postService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.postService = postService;
     }
 
     @GetMapping("{id}")
     @JsonView(PostViews.Public.class)
     public Mono<Post> get(@PathVariable final String id) {
-        return postRepository.findById(id).log();
+        return postService.get(id);
     }
 
     private Mono<Post> savePost(final Post post) {
-        return postRepository.save(post);
+        return postService.save(post);
     }
 
     @PostMapping("/")
@@ -43,7 +47,7 @@ public class PostController {
                              @RequestBody Mono<Post> requestPost) {
         return requestPost
                 .flatMap(post -> currentUser(principal)
-                        .map(appUser -> fromPost(post).senderId(appUser.getId()).build())
+                        .map(appUser -> post.toBuilder().senderId(appUser.getId()).build())
                         .flatMap(this::savePost));
     }
 
@@ -64,7 +68,7 @@ public class PostController {
         return currentUser(principal)
                 .filter(authUser -> authUser.getId().equals(userId))
                 .switchIfEmpty(Mono.error(new UnauthorizedException("Unauthorized Modification")))
-                .flatMap(authUser -> postRepository.save(fromPost(updatePost).build()));
+                .flatMap(authUser -> postRepository.save(updatePost.toBuilder().build()));
     }
 
     @GetMapping("/all")
@@ -117,12 +121,12 @@ public class PostController {
         return postRepository
                 .findById(parentPostId)
                 .flatMap(parentPost -> {
-                    Post reply = fromPost(replyPost).senderId(userId).parentId(parentPostId).build();
+                    Post reply = replyPost.toBuilder().senderId(userId).parentId(parentPostId).build();
                     return zip(Mono.just(parentPost), Mono.just(reply));
                 }).flatMap(tuple -> {
-                    if (!tuple.getT1().hasReplies()) {
-                        Post parent = fromPost(tuple.getT1())
-                                .hasReplies(true)
+                    if (!tuple.getT1().isRepliesPresent()) {
+                        Post parent = tuple.getT1().toBuilder()
+                                .repliesPresent(true)
                                 .build();
                         return savePost(tuple.getT2()).then(savePost(parent));
                     } else {

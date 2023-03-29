@@ -6,9 +6,7 @@ import lombok.NonNull;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Builder(toBuilder = true)
 @Getter
@@ -23,9 +21,9 @@ public class Channel {
     String label;
     String topics;
     @Builder.Default
-    List<String> userIds = new ArrayList<>();
+    Set<String> userIds = new HashSet<>();
     @Builder.Default
-    List<String> postIds = new ArrayList<>();
+    Set<String> postIds = new HashSet<>();
     @Builder.Default
     Date created = new Date();
     @Builder.Default

@@ -6,9 +6,7 @@ import lombok.NonNull;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Builder(toBuilder = true)
 @ToString
@@ -39,7 +37,7 @@ public class ApplicationUser {
     @Builder.Default
     private List<String> roles = new ArrayList<>();
     @Builder.Default
-    private List<String> channelIds = new ArrayList<>();
+    private Set<String> channelIds = new HashSet<>();
     @Builder.Default
-    private List<String> spaceIds = new ArrayList<>();
+    private Set<String> spaceIds = new HashSet<>();
 }
