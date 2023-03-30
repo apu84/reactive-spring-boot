@@ -5,23 +5,24 @@ import com.chatty.core.channel.ChannelController
 import com.chatty.core.channel.ChannelRepository
 import com.chatty.core.post.ChannelPost
 import com.chatty.core.post.PostRepository
+import com.chatty.core.space.Space
+import com.chatty.core.space.SpaceRepository
 import com.chatty.core.user.ApplicationUser
 import com.chatty.core.user.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import reactor.core.publisher.Mono
 
-@WebFluxTest(controllers= ChannelController.class)
+@WebFluxTest(controllers = ChannelController.class)
 class ChannelSpec extends BaseSpecification {
-
     @Autowired
     ChannelRepository  channelRepository
-
     @Autowired
     UserRepository userRepository
-
     @Autowired
     PostRepository postRepository
+    @Autowired
+    SpaceRepository spaceRepository
 
     def setup() {
     }
@@ -198,7 +199,13 @@ class ChannelSpec extends BaseSpecification {
     }
 
     def "Add post to channel"() {
-        given: "User is subscribed to channel"
+        given: "A space exists"
+            var space = Space.builder()
+                    .name("demo")
+                    .label("Demo")
+                    .build();
+            var savedSpace = spaceRepository.save(space).block()
+        and: "User is subscribed to channel"
             setupLoggedInUser('USER')
             var user = ApplicationUser.builder()
                     .username("test")
@@ -211,7 +218,7 @@ class ChannelSpec extends BaseSpecification {
                 .name("general")
                 .label("General")
                 .userIds(Set.of(savedUser.getId()))
-                .spaceId("some_dummy_space")
+                .spaceId(savedSpace.getId())
                 .build()
             var savedChannel = channelRepository.save(channel).block()
 
@@ -303,5 +310,6 @@ class ChannelSpec extends BaseSpecification {
     def cleanup() {
         userRepository.deleteAll().block()
         channelRepository.deleteAll().block()
+        spaceRepository.deleteAll().block()
     }
 }

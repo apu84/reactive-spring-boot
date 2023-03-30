@@ -7,6 +7,7 @@ import com.chatty.core.post.Post;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

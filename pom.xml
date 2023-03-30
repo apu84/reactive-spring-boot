@@ -17,6 +17,7 @@
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<reactor.kafka.version>1.3.17</reactor.kafka.version>
 	</properties>
 	<packaging>jar</packaging>
 	<dependencies>
@@ -45,6 +46,11 @@
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor.kafka</groupId>
+			<artifactId>reactor-kafka</artifactId>
+			<version>${reactor.kafka.version}</version>
 		</dependency>
 
 		<!-- Logging -->
