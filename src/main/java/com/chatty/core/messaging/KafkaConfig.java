@@ -1,6 +1,7 @@
 package com.chatty.core.messaging;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -13,6 +14,7 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import reactor.kafka.receiver.ReceiverOptions;
 import reactor.kafka.sender.KafkaSender;
 import reactor.kafka.sender.SenderOptions;
 
@@ -79,5 +81,17 @@ public class KafkaConfig {
     @Bean
     public KafkaSender<String, Object> kafkaSender(SenderOptions<String, Object> senderOptions) {
         return KafkaSender.create(senderOptions);
+    }
+
+    @Bean
+    public ReceiverOptions<String, Object> receiverOptions() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrapServers);
+        props.put(ConsumerConfig.CLIENT_ID_CONFIG, "sample-consumer");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "sample-group");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        return ReceiverOptions.create(props);
     }
 }

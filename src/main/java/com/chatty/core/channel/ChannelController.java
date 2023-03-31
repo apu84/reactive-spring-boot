@@ -1,5 +1,7 @@
 package com.chatty.core.channel;
 
+import com.chatty.core.messaging.ChannelPostMessageService;
+import com.chatty.core.messaging.Topic;
 import com.chatty.core.post.ChannelPost;
 import com.chatty.core.post.Post;
 import com.chatty.core.user.ApplicationUser;
@@ -20,11 +22,17 @@ import static reactor.core.publisher.Mono.zip;
 public class ChannelController {
     private final ChannelService channelService;
     private final UserService userService;
+    private final ChannelPostService channelPostService;
+    private final ChannelPostMessageService channelPostMessageService;
     @Autowired
     public ChannelController(final ChannelService channelService,
-                             final UserService userService) {
+                             final UserService userService,
+                             final ChannelPostService channelPostService,
+                             final ChannelPostMessageService channelPostMessageService) {
         this.channelService = channelService;
         this.userService = userService;
+        this.channelPostService = channelPostService;
+        this.channelPostMessageService = channelPostMessageService;
     }
     @GetMapping("/{id}")
     public Mono<Channel> getChannel(@PathVariable String id) {
@@ -55,13 +63,13 @@ public class ChannelController {
                                        @PathVariable String channelId) {
         return applicationUserMono.flatMap(user -> channelService.addUserToChannel(user.getId(), channelId));
     }
-    @PostMapping("/{channelId}/subscribe")
+    @PostMapping("/{channelId}/add-currentUser")
     public Mono<ApplicationUser> addCurrentUserToChannel(@AuthenticationPrincipal Mono<UserDetails> principal,
                                        @PathVariable String channelId) {
         return userService.toApplicationUser(principal)
                 .flatMap(user -> channelService.addUserToChannel(user.getId(), channelId));
     }
-    @PostMapping("/{channelId}/unsubscribe")
+    @PostMapping("/{channelId}/remove-currentUser")
     public Mono<ApplicationUser> removeCurrentUserFromChannel(@AuthenticationPrincipal Mono<UserDetails> principal,
                                               @PathVariable String channelId) {
         return userService.toApplicationUser(principal)
@@ -78,7 +86,7 @@ public class ChannelController {
                                          @RequestBody Mono<Post> postMono,
                                          @PathVariable String channelId) {
         return zip(userService.toApplicationUser(principal), postMono)
-                .flatMap(tuple -> channelService.addUserPost(tuple.getT1(), tuple.getT2(), channelId));
+                .flatMap(tuple -> channelPostService.addUserPost(tuple.getT1(), tuple.getT2(), channelId));
     }
 
     @PostMapping("/{channelId}/post/{parentPostId}/replies")
@@ -88,5 +96,12 @@ public class ChannelController {
                                       @PathVariable String parentPostId) {
         return zip(userService.toApplicationUser(principal), postMono)
                 .flatMap(tuple -> channelService.addUserPostReply(tuple.getT1(), parentPostId, tuple.getT2(), channelId));
+    }
+
+    @GetMapping(value = "/{channelId}/post/subscribe", produces = "text/event-stream;charset=UTF-8")
+    public Flux<Object> subscribeToChannelPost(@PathVariable String channelId) {
+        return channelPostService
+                .buildTopic(channelId)
+                .flatMapMany(channelPostMessageService::consumeMessage);
     }
 }

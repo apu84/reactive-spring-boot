@@ -2,6 +2,7 @@ package com.chatty
 
 import com.chatty.core.channel.Channel
 import com.chatty.core.channel.ChannelController
+import com.chatty.core.channel.ChannelPostRepository
 import com.chatty.core.channel.ChannelRepository
 import com.chatty.core.post.ChannelPost
 import com.chatty.core.post.PostRepository
@@ -23,6 +24,8 @@ class ChannelSpec extends BaseSpecification {
     PostRepository postRepository
     @Autowired
     SpaceRepository spaceRepository
+    @Autowired
+    ChannelPostRepository channelPostRepository
 
     def setup() {
     }
@@ -310,6 +313,7 @@ class ChannelSpec extends BaseSpecification {
     def cleanup() {
         userRepository.deleteAll().block()
         channelRepository.deleteAll().block()
+        channelPostRepository.deleteAll().block()
         spaceRepository.deleteAll().block()
     }
 }
