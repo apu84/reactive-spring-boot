@@ -23,7 +23,7 @@ public class SpaceController {
       this.channelService = channelService;
     }
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Space> createSpace(@RequestBody Mono<Space> space) {
         return space.flatMap(spaceService::save);

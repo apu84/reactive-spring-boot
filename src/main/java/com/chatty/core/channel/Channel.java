@@ -16,7 +16,6 @@ public class Channel {
     String id;
     @NonNull
     String name;
-    @NonNull
     String spaceId;
     String label;
     String topics;

@@ -7,6 +7,7 @@ import com.chatty.core.post.ChannelPost;
 import com.chatty.core.post.Post;
 import com.chatty.core.space.SpaceService;
 import com.chatty.core.user.ApplicationUser;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,7 @@ public class ChannelPostService extends CrudService<ChannelPost, ChannelPostRepo
         this.channelService = channelService;
     }
 
-    Mono<ChannelPost> addUserPost(ApplicationUser user, Post post, String channelId) {
+    Mono<ChannelPost> addUserPost(@NonNull ApplicationUser user, @NonNull Post post, String channelId) {
         ChannelPost channelPost = ChannelPost.builder()
                 .parentId(user.getId())
                 .channelId(channelId)
@@ -51,11 +52,11 @@ public class ChannelPostService extends CrudService<ChannelPost, ChannelPostRepo
                 .map(Tuple2::getT1);
     }
 
-    public Mono<Topic> buildTopic(ChannelPost channelPost) {
+    public Mono<Topic> buildTopic(@NonNull ChannelPost channelPost) {
         return buildTopic(channelPost.getChannelId());
     }
 
-    public Mono<Topic> buildTopic(String channelId) {
+    public Mono<Topic> buildTopic(@NonNull String channelId) {
         return channelService
                 .get(channelId)
                 .flatMap(channel -> zip(just(channel), spaceService.get(channel.getSpaceId())))

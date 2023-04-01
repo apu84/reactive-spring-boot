@@ -19,9 +19,9 @@ import static reactor.core.publisher.Mono.zip;
 @RequestMapping("/post")
 @Slf4j
 public class PostController {
-    private PostRepository postRepository;
-    private UserRepository userRepository;
-    private PostService postService;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final PostService postService;
 
     @Autowired
     PostController(final PostRepository postRepository,

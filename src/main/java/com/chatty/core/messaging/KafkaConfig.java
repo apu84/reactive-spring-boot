@@ -91,7 +91,8 @@ public class KafkaConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "sample-group");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.chatty.core.post");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest"); //earliest to get from beginning
         return ReceiverOptions.create(props);
     }
 }
