@@ -1,13 +1,12 @@
 package com.chatty.core.channel;
 
 import com.chatty.core.messaging.ChannelPostMessageService;
-import com.chatty.core.messaging.Topic;
 import com.chatty.core.post.ChannelPost;
 import com.chatty.core.post.Post;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -99,7 +98,7 @@ public class ChannelController {
     }
 
     @GetMapping(value = "/{channelId}/post/subscribe", produces = "text/event-stream;charset=UTF-8")
-    public Flux<Object> subscribeToChannelPost(@PathVariable String channelId) {
+    public Flux<ServerSentEvent<Object>> subscribeToChannelPost(@PathVariable String channelId) {
         return channelPostService
                 .buildTopic(channelId)
                 .flatMapMany(channelPostMessageService::consumeMessage);

@@ -2,9 +2,11 @@ package com.chatty.core.messaging;
 
 import com.chatty.core.post.ChannelPost;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,7 +27,7 @@ import java.util.Map;
 public class ChannelPostMessageService {
     private final KafkaSender<String, Object> kafkaSender;
     private final ReceiverOptions<String, Object> receiverOptions;
-    private final Map<String, Sinks.Many<Object>> topicSink = new HashMap<>();
+    private final Map<String, Sinks.Many<ServerSentEvent<Object>>> topicSink = new HashMap<>();
     @Autowired
     public ChannelPostMessageService(final KafkaSender<String, Object> kafkaSender,
                                      final ReceiverOptions<String, Object> receiverOptions) {
@@ -54,17 +56,17 @@ public class ChannelPostMessageService {
                 }).next();
     }
 
-    private Sinks.Many<Object> consume(Topic topic) {
+    private Sinks.Many<ServerSentEvent<Object>> consume(Topic topic) {
         var options = receiverOptions.subscription(Collections.singleton(topic.toString()))
                 .addAssignListener(partitions -> log.debug("onPartitionsAssigned {}", partitions))
                 .addRevokeListener(partitions -> log.debug("onPartitionsRevoked {}", partitions));
         KafkaReceiver.create(options).receive()
                 .log()
-                .subscribe(record -> topicSink.get(topic.toString()).tryEmitNext(record.value()));
+                .subscribe(record -> topicSink.get(topic.toString()).tryEmitNext(toServerSentEvent(record)));
         return topicSink.get(topic.toString());
     }
 
-    public Flux<Object> consumeMessage(Topic topic) {
+    public Flux<ServerSentEvent<Object>> consumeMessage(Topic topic) {
          var sink = topicSink.get(topic.toString());
          if(sink == null) {
             topicSink.put(topic.toString(), Sinks.many().multicast().onBackpressureBuffer());
@@ -72,4 +74,12 @@ public class ChannelPostMessageService {
          }
          return sink.asFlux();
     }
+    static ServerSentEvent<Object> toServerSentEvent(ConsumerRecord<String, Object> consumerRecord) {
+        return ServerSentEvent.builder()
+                .event(consumerRecord.topic())
+                .data(consumerRecord.value())
+                .id(String.valueOf(consumerRecord.timestamp()))
+                .build();
+    }
+
 }
