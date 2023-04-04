@@ -1,6 +1,7 @@
 package com.chatty.core.channel;
 
 import com.chatty.core.messaging.ChannelPostMessageService;
+import com.chatty.core.messaging.Event;
 import com.chatty.core.post.ChannelPost;
 import com.chatty.core.post.Post;
 import com.chatty.core.user.ApplicationUser;
@@ -98,7 +99,7 @@ public class ChannelController {
     }
 
     @GetMapping(value = "/{channelId}/post/subscribe", produces = "text/event-stream;charset=UTF-8")
-    public Flux<ServerSentEvent<Object>> subscribeToChannelPost(@PathVariable String channelId) {
+    public Flux<Event<ChannelPost>> subscribeToChannelPost(@PathVariable String channelId) {
         return channelPostService
                 .buildTopic(channelId)
                 .flatMapMany(channelPostMessageService::consumeMessage);

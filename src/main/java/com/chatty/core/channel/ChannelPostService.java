@@ -2,6 +2,7 @@ package com.chatty.core.channel;
 
 import com.chatty.core.CrudService;
 import com.chatty.core.messaging.ChannelPostMessageService;
+import com.chatty.core.messaging.Event;
 import com.chatty.core.messaging.Topic;
 import com.chatty.core.post.ChannelPost;
 import com.chatty.core.post.Post;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
+
+import java.util.Date;
 
 import static reactor.core.publisher.Mono.just;
 import static reactor.core.publisher.Mono.zip;
@@ -46,10 +49,19 @@ public class ChannelPostService extends CrudService<ChannelPost, ChannelPostRepo
     @Override
     public Mono<ChannelPost> save(ChannelPost channelPost) {
         return super.save(channelPost)
-                .flatMap(savedPost -> zip(Mono.just(savedPost),
-                        channelPostMessageService
-                                .sendMessage(buildTopic(channelPost), savedPost)))
-                .map(Tuple2::getT1);
+                .flatMap(savedPost ->
+                        zip(Mono.just(savedPost),
+                            buildTopic(channelPost).flatMap(topic -> channelPostMessageService.sendMessage(topic, buildEvent(topic, savedPost))))
+                .map(Tuple2::getT1));
+    }
+
+    private Event<ChannelPost> buildEvent(Topic topic,ChannelPost channelPost) {
+        return Event.<ChannelPost>builder()
+                .eventType(Event.EventType.CREATED)
+                .event(topic.toString())
+                .dateTime(new Date())
+                .data(channelPost)
+                .build();
     }
 
     public Mono<Topic> buildTopic(@NonNull ChannelPost channelPost) {
