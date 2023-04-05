@@ -80,6 +80,6 @@ public class ChannelPostMessageService {
             topicSink.put(topic.toString(), Sinks.many().multicast().onBackpressureBuffer());
             sink = consume(topic);
         }
-        return sink.asFlux();
+        return Flux.concat(sink.asFlux(),eventService.eventsAfter(lastEventId));
     }
 }
