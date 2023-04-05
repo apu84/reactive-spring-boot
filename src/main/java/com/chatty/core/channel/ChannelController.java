@@ -8,6 +8,7 @@ import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -99,9 +100,11 @@ public class ChannelController {
     }
 
     @GetMapping(value = "/{channelId}/post/subscribe", produces = "text/event-stream;charset=UTF-8")
-    public Flux<Event<ChannelPost>> subscribeToChannelPost(@PathVariable String channelId) {
+    public Flux<Event<ChannelPost>> subscribeToChannelPost(
+            @Header(value = "Last-Event-Id", required = false) String lastEventId,
+            @PathVariable String channelId) {
         return channelPostService
                 .buildTopic(channelId)
-                .flatMapMany(channelPostMessageService::consumeMessage);
+                .flatMapMany(topic -> channelPostMessageService.consumeMessage(topic, lastEventId));
     }
 }

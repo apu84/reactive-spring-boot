@@ -73,4 +73,13 @@ public class ChannelPostMessageService {
         }
         return sink.asFlux();
     }
+
+    public Flux<Event<ChannelPost>> consumeMessage(Topic topic, String lastEventId) {
+        var sink = topicSink.get(topic.toString());
+        if (sink == null) {
+            topicSink.put(topic.toString(), Sinks.many().multicast().onBackpressureBuffer());
+            sink = consume(topic);
+        }
+        return sink.asFlux();
+    }
 }
