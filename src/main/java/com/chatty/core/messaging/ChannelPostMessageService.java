@@ -36,7 +36,7 @@ public class ChannelPostMessageService {
         this.eventService = eventService;
     }
 
-    public Mono<SenderResult<Event<ChannelPost>>> sendMessage(Topic topic, Event<ChannelPost> channelPost) {
+    public Mono<Event<ChannelPost>> sendMessage(Topic topic, Event<ChannelPost> channelPost) {
         log.info("Sending to topic={}, {}={}", topic, ChannelPost.class.getSimpleName(), channelPost);
         return kafkaSender
                 .send(Mono.just(channelPost).map(post -> SenderRecord.create(new ProducerRecord<>(topic.toString(), post), post)))
@@ -50,7 +50,9 @@ public class ChannelPostMessageService {
                             recordMetadata.partition(),
                             recordMetadata.offset(),
                             timestamp.toString()));
-                }).next();
+                })
+                .next()
+                .flatMap(record -> eventService.save(channelPost));
     }
 
     private Sinks.Many<Event<ChannelPost>> consume(Topic topic) {
@@ -59,8 +61,7 @@ public class ChannelPostMessageService {
                 .addRevokeListener(partitions -> log.debug("onPartitionsRevoked {}", partitions));
         KafkaReceiver.create(options).receive()
                 .log()
-                .flatMap(record -> eventService.save(record.value()))
-                .subscribe(record -> topicSink.get(topic.toString()).tryEmitNext(record));
+                .subscribe(record -> topicSink.get(topic.toString()).tryEmitNext(record.value()));
         return topicSink.get(topic.toString());
     }
 

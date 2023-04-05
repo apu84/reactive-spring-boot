@@ -51,7 +51,8 @@ public class ChannelPostService extends CrudService<ChannelPost, ChannelPostRepo
         return super.save(channelPost)
                 .flatMap(savedPost ->
                         zip(Mono.just(savedPost),
-                            buildTopic(channelPost).flatMap(topic -> channelPostMessageService.sendMessage(topic, buildEvent(topic, savedPost))))
+                            buildTopic(channelPost)
+                                    .flatMap(topic -> channelPostMessageService.sendMessage(topic, buildEvent(topic, savedPost))))
                 .map(Tuple2::getT1));
     }
 
