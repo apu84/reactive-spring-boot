@@ -77,7 +77,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvb
 Content-Type: application/json
 
 {
-  "content": "In between heartbeats"
+  "content": "Nothing at all - what the heck is going on"
 }
 
 ###
