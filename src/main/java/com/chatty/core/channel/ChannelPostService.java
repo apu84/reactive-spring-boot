@@ -1,6 +1,7 @@
 package com.chatty.core.channel;
 
 import com.chatty.core.CrudService;
+import com.chatty.core.messaging.ChannelPostEvent;
 import com.chatty.core.messaging.ChannelPostMessageService;
 import com.chatty.core.messaging.Event;
 import com.chatty.core.messaging.Topic;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.util.Date;
+import java.util.UUID;
 
 import static reactor.core.publisher.Mono.just;
 import static reactor.core.publisher.Mono.zip;
@@ -56,8 +58,9 @@ public class ChannelPostService extends CrudService<ChannelPost, ChannelPostRepo
                 .map(Tuple2::getT1));
     }
 
-    private Event<ChannelPost> buildEvent(Topic topic,ChannelPost channelPost) {
-        return Event.<ChannelPost>builder()
+    private ChannelPostEvent buildEvent(Topic topic, ChannelPost channelPost) {
+        return ChannelPostEvent.builder()
+                .id(UUID.randomUUID().toString())
                 .eventType(Event.EventType.CREATED)
                 .event(topic.toString())
                 .dateTime(new Date())

@@ -101,7 +101,7 @@ public class ChannelController {
 
     @GetMapping(value = "/{channelId}/post/subscribe", produces = "text/event-stream;charset=UTF-8")
     public Flux<Event<ChannelPost>> subscribeToChannelPost(
-            @Header(value = "Last-Event-Id", required = false) String lastEventId,
+            @RequestHeader("last-event-id") String lastEventId,
             @PathVariable String channelId) {
         return channelPostService
                 .buildTopic(channelId)

@@ -1,0 +1,88 @@
+# curl -X POST http://localhost/auth/login -H "Content-Type: application/json" --data-raw '{"username": "shaun@test.com", "password": "admin"}
+POST http://localhost:8899/auth/login
+Content-Type: application/json
+
+{
+  "username": "shaun@test.com",
+  "password": "admin"
+}
+
+###
+
+
+###
+
+###
+
+# curl http://localhost:8899/auth/me -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1biIsInJvbGVzIjoiVVNFUiIsImlhdCI6MTY3ODU1NjI5MSwiZXhwIjoxNjc4NTU5ODkxfQ.OJM5IjBzRuEbYFTfSo9ccy6LluuXgPdGyCp78lBkxlw"
+GET http://localhost:8899/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1biIsInJvbGVzIjoiVVNFUiIsImlhdCI6MTY3ODYzMDk2MCwiZXhwIjoxNjc4NjMxNTYwfQ.cVwvhYGYa558K95aq7dy6Mc-M5Z-1e8HQmfVWIiFalo
+
+<> 2023-03-12T203032.200.json
+<> 2023-03-12T202300.200.json
+<> 2023-03-12T202222.200.json
+<> 2023-03-11T234441.200.json
+<> 2023-03-11T234243.200.json
+
+###
+
+# curl http://localhost:8899/auth/logout -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1biIsInJvbGVzIjoiVVNFUiIsImlhdCI6MTY3ODU1NjI5MSwiZXhwIjoxNjc4NTU5ODkxfQ.OJM5IjBzRuEbYFTfSo9ccy6LluuXgPdGyCp78lBkxl"
+GET http://localhost:8899/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1biIsInJvbGVzIjoiVVNFUiIsImlhdCI6MTY3ODU1NjI5MSwiZXhwIjoxNjc4NTU5ODkxfQ.OJM5IjBzRuEbYFTfSo9ccy6LluuXgPdGyCp78lBkxl
+
+###
+# curl -v -X POST http://localhost:8899/auth/new-user --data-raw '{"username": "App Admin", "email": "admin@sure.com", "password": "admin"}' -H "Content-Type: application/json"
+POST http://localhost:8899/auth/new-user
+Content-Type: application/json
+
+{
+  "username": "John Doe",
+  "email": "john@sure.com",
+  "password": "admin"
+}
+
+<> 2023-03-13T183750.201.json
+<> 2023-03-13T175912.201.json
+<> 2023-03-13T145648.201.json
+
+###
+
+# curl -v -X POST http://localhost:8090/chatty/space -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MDM3MTY1NiwiZXhwIjoxNjgwMzc1MjU2fQ.Ghd38ivzXy475ap1CYlrQSgNv2Ox6fec6qoG5Xa_Dqw" --data-raw '{"name": "demo", "label": "Demo"}'
+POST http://localhost:8090/chatty/space
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MDM3MTY1NiwiZXhwIjoxNjgwMzc1MjU2fQ.Ghd38ivzXy475ap1CYlrQSgNv2Ox6fec6qoG5Xa_Dqw
+Content-Type: application/json
+
+{
+  "name": "demo",
+  "label": "Demo"
+}
+
+###
+
+# curl -v -X POST http://localhost:8090/chatty/space/64287117e020c42c61848b59/channel -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MDM3MTY1NiwiZXhwIjoxNjgwMzc1MjU2fQ.Ghd38ivzXy475ap1CYlrQSgNv2Ox6fec6qoG5Xa_Dqw" --data-raw '{"name": "lobby", "label": "Lobby"}'
+POST http://localhost:8090/chatty/space/64287117e020c42c61848b59/channel
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MDM3MTY1NiwiZXhwIjoxNjgwMzc1MjU2fQ.Ghd38ivzXy475ap1CYlrQSgNv2Ox6fec6qoG5Xa_Dqw
+Content-Type: application/json
+
+{
+  "name": "lobby",
+  "label": "Lobby"
+}
+
+###
+
+# curl -v -X POST http://localhost:8090/chatty/channel/642872d4a3012e0dc1711345/post -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MDM3MTY1NiwiZXhwIjoxNjgwMzc1MjU2fQ.Ghd38ivzXy475ap1CYlrQSgNv2Ox6fec6qoG5Xa_Dqw" --data-raw '{"content": "channel post"}'
+POST http://localhost:8090/chatty/channel/642872d4a3012e0dc1711345/post
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MTExMDYwNywiZXhwIjoxNjgxMTE0MjA3fQ.oaN5CdB-ag1HosFB4b7o2nfFbhgwW3-AobS_mDzg2DM
+Content-Type: application/json
+
+{
+  "content": "Nicest thing ever-----"
+}
+
+###
+
+
+
+
+
