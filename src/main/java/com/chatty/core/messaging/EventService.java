@@ -19,7 +19,7 @@ public class EventService extends CrudService<ChannelPostEvent, EventRepository,
     public Flux<ChannelPostEvent> eventsAfter(Topic topic, String eventId) {
         return get(eventId).flatMapMany(savedEvent -> {
             Date date = savedEvent.getDateTime();
-            return eventRepository.findByDateTimeAfter(date).log();
+            return eventRepository.findByDateTimeAfterAndEvent(date, topic.toString()).log();
         });
     }
 }
