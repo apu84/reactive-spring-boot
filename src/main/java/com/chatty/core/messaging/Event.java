@@ -29,5 +29,6 @@ public class Event<T> {
         CREATED,
         UPDATED,
         REMOVED,
+        KEEP_ALIVE,
     }
 }

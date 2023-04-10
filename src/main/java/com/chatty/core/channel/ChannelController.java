@@ -1,11 +1,14 @@
 package com.chatty.core.channel;
 
+import com.chatty.core.messaging.ChannelPostEvent;
 import com.chatty.core.messaging.ChannelPostMessageService;
 import com.chatty.core.messaging.Event;
 import com.chatty.core.post.ChannelPost;
 import com.chatty.core.post.Post;
 import com.chatty.core.user.ApplicationUser;
 import com.chatty.core.user.UserService;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.handler.annotation.Header;
@@ -16,10 +19,15 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.Date;
+import java.util.UUID;
+
 import static reactor.core.publisher.Mono.zip;
 
 @RequestMapping("/channel")
 @RestController
+@Slf4j
 public class ChannelController {
     private final ChannelService channelService;
     private final UserService userService;
@@ -100,11 +108,31 @@ public class ChannelController {
     }
 
     @GetMapping(value = "/{channelId}/post/subscribe", produces = "text/event-stream;charset=UTF-8")
-    public Flux<Event<ChannelPost>> subscribeToChannelPost(
-            @RequestHeader("last-event-id") String lastEventId,
+    public Flux<ChannelPostEvent> subscribeToChannelPost(
+            @RequestHeader(name="last-event-id", required = false) String lastEventId,
             @PathVariable String channelId) {
+        return keepAlive(Duration.ofSeconds(10), subscribeTo(channelId, lastEventId), channelId);
+    }
+
+    private Flux<ChannelPostEvent> subscribeTo(String channelId, String lastEventId) {
         return channelPostService
                 .buildTopic(channelId)
                 .flatMapMany(topic -> channelPostMessageService.consumeMessage(topic, lastEventId));
+    }
+
+    private Flux<ChannelPostEvent> keepAlive(Duration duration, Flux<ChannelPostEvent> data, String id) {
+        Flux<ChannelPostEvent> heartBeat = Flux.interval(duration)
+                .map(e -> getHearBeatObject(id))
+                .doFinally(signalType -> log.info("Heartbeat closed for id: {}", id));
+        return Flux.merge(heartBeat, data);
+    }
+
+    private ChannelPostEvent getHearBeatObject(String heartBeatFor) {
+        return ChannelPostEvent.builder()
+                .id(UUID.randomUUID().toString())
+                .event("Keep alive for: " + heartBeatFor)
+                .eventType(Event.EventType.KEEP_ALIVE)
+                .dateTime(new Date())
+                .build();
     }
 }

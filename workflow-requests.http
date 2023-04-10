@@ -73,11 +73,11 @@ Content-Type: application/json
 
 # curl -v -X POST http://localhost:8090/chatty/channel/642872d4a3012e0dc1711345/post -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MDM3MTY1NiwiZXhwIjoxNjgwMzc1MjU2fQ.Ghd38ivzXy475ap1CYlrQSgNv2Ox6fec6qoG5Xa_Dqw" --data-raw '{"content": "channel post"}'
 POST http://localhost:8090/chatty/channel/642872d4a3012e0dc1711345/post
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MTExMDYwNywiZXhwIjoxNjgxMTE0MjA3fQ.oaN5CdB-ag1HosFB4b7o2nfFbhgwW3-AobS_mDzg2DM
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaGF1bkB0ZXN0LmNvbSIsInJvbGVzIjoiQURNSU4sVVNFUiIsImlhdCI6MTY4MTExNzM0NiwiZXhwIjoxNjgxMTIwOTQ2fQ.KO14gWhHUOEQiTfxl6r2kcdlo6t1qloedsOtU1nNTYA
 Content-Type: application/json
 
 {
-  "content": "Nicest thing ever-----"
+  "content": "In between heartbeats"
 }
 
 ###
